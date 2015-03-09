@@ -398,16 +398,12 @@ public class MainActivity extends Activity implements
     @Override
     public void onConnected(Bundle bundle) {
         debugLog("onConnected");
-
-        // The GoogleAPIClient is connected and we can begin using the Nearby Connections API.
         updateViewVisibility(STATE_READY);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         debugLog("onConnectionSuspended: " + i);
-
-        // The GoogleAPIClient is not connected and we should not use the Nearby Connections API.
         updateViewVisibility(STATE_IDLE);
 
         // Try to re-connect
@@ -417,8 +413,6 @@ public class MainActivity extends Activity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         debugLog("onConnectionFailed: " + connectionResult);
-
-        // The GoogleAPIClient is not connected and we should not use the Nearby Connections API.
         updateViewVisibility(STATE_IDLE);
     }
 
@@ -437,8 +431,6 @@ public class MainActivity extends Activity implements
         }
     }
 
-    /** Update the visibility of on-screen views based on the state of the application **/
-
     /**
      * Change the application state and update the visibility on on-screen views '
      * based on the new state of the application.
@@ -448,10 +440,13 @@ public class MainActivity extends Activity implements
         mState = newState;
         switch (mState) {
             case STATE_IDLE:
+                // The GoogleAPIClient is not connected, we can't yet start advertising or
+                // discovery so hide all buttons
                 findViewById(R.id.layout_nearby_buttons).setVisibility(View.GONE);
                 findViewById(R.id.layout_message).setVisibility(View.GONE);
                 break;
             case STATE_READY:
+                // The GoogleAPIClient is connected, we can begin advertising or discovery.
                 findViewById(R.id.layout_nearby_buttons).setVisibility(View.VISIBLE);
                 findViewById(R.id.layout_message).setVisibility(View.GONE);
                 break;
@@ -460,6 +455,8 @@ public class MainActivity extends Activity implements
             case STATE_DISCOVERING:
                 break;
             case STATE_CONNECTED:
+                // We are connected to another device via the Connections API, so we can
+                // show the message UI.
                 findViewById(R.id.layout_nearby_buttons).setVisibility(View.VISIBLE);
                 findViewById(R.id.layout_message).setVisibility(View.VISIBLE);
                 break;
