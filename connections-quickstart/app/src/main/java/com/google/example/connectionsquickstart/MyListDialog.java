@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.ArrayAdapter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,10 +71,11 @@ public class MyListDialog {
      * @param value the value of the item to remove.
      */
     public void removeItemByValue(String value) {
-        Set<Map.Entry<String, String>> entrySet = mItemMap.entrySet();
-        for (Map.Entry<String, String> entry: entrySet) {
+        Iterator<Map.Entry<String, String>> iterator = mItemMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
             if (entry.getValue().equals(value)) {
-                mItemMap.remove(entry.getKey());
+                iterator.remove();
                 mAdapter.remove(entry.getKey());
                 mAdapter.notifyDataSetChanged();
             }
