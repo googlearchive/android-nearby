@@ -21,7 +21,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,9 +41,12 @@ import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessageListener;
 import com.google.android.gms.nearby.messages.NearbyMessagesStatusCodes;
+import com.google.android.gms.nearby.messages.PublishCallback;
+import com.google.android.gms.nearby.messages.PublishOptions;
 import com.google.android.gms.nearby.messages.Strategy;
+import com.google.android.gms.nearby.messages.SubscribeCallback;
+import com.google.android.gms.nearby.messages.SubscribeOptions;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -133,11 +135,6 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
      */
     private boolean mResolvingNearbyPermissionError = false;
 
-    /**
-     * A Handler that resets the state when a subscription expires or when the device is no longer
-     * publishing.
-     */
-    private ResetStateHandler mResetStateHandler;
 
     public MainFragment() {
     }
@@ -244,7 +241,6 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mResetStateHandler = new ResetStateHandler(this);
     }
 
     @Override
@@ -260,6 +256,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -353,10 +350,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     /**
-     * Subscribes to messages from nearby devices. If successful, enqueues a
-     * {@link android.os.Message} that is sent to the {@code ResetHandler} when the subscription
-     * ends, which then updates state. If not successful, attempts to resolve any error related to
-     * Nearby permissions by displaying an opt-in dialog.
+     * Subscribes to messages from nearby devices. If not successful, attempts to resolve any error
+     * related to Nearby permissions by displaying an opt-in dialog. Registers a callback which
+     * updates state when the subscription expires.
      */
     private void subscribe() {
         Log.i(TAG, "trying to subscribe");
@@ -367,15 +363,26 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                 mGoogleApiClient.connect();
             }
         } else {
-            Nearby.Messages.subscribe(mGoogleApiClient, mMessageListener, PUB_SUB_STRATEGY)
+            clearDeviceList();
+            SubscribeOptions options = new SubscribeOptions.Builder()
+                    .setStrategy(PUB_SUB_STRATEGY)
+                    .setCallback(new SubscribeCallback() {
+                        @Override
+                        public void onExpired() {
+                            super.onExpired();
+                            Log.i(TAG, "no longer subscribing");
+                            updateSharedPreference(Constants.KEY_SUBSCRIPTION_TASK,
+                                    Constants.TASK_NONE);
+                        }
+                    }).build();
+
+            Nearby.Messages.subscribe(mGoogleApiClient, mMessageListener, options)
                     .setResultCallback(new ResultCallback<Status>() {
 
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
                                 Log.i(TAG, "subscribed successfully");
-                                sendMessageToHandler(Constants.NO_LONGER_SUBSCRIBING,
-                                        Constants.TTL_IN_MILLISECONDS);
                             } else {
                                 Log.i(TAG, "could not subscribe");
                                 handleUnsuccessfulNearbyResult(status);
@@ -383,18 +390,6 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         }
                     });
         }
-    }
-
-    /**
-     * Sends an {@link android.os.Message} to {@link ResetStateHandler} to change state when a
-     * publication or a subscription end.
-     *
-     * @param messageID         Value to assign to the returned Message.what field.
-     * @param ttlInMilliseconds Time to wait before enqueuing the Message.
-     */
-    void sendMessageToHandler(int messageID, int ttlInMilliseconds) {
-        android.os.Message msg = mResetStateHandler.obtainMessage(messageID);
-        mResetStateHandler.sendMessageDelayed(msg, ttlInMilliseconds);
     }
 
     /**
@@ -411,7 +406,6 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                 mGoogleApiClient.connect();
             }
         } else {
-            clearDeviceList();
             Nearby.Messages.unsubscribe(mGoogleApiClient, mMessageListener)
                     .setResultCallback(new ResultCallback<Status>() {
 
@@ -431,10 +425,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     /**
-     * Publishes device information to nearby devices. If successful, enqueues a
-     * {@link android.os.Message} that is sent to the {@code ResetHandler} when the publication
-     * ends, which updates state. If not successful, attempts to resolve any error related to
-     * Nearby permissions by displaying an opt-in dialog.
+     * Publishes device information to nearby devices. If not successful, attempts to resolve any
+     * error related to Nearby permissions by displaying an opt-in dialog. Registers a callback
+     * that updates the UI when the publication expires.
      */
     private void publish() {
         Log.i(TAG, "trying to publish");
@@ -445,17 +438,25 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                 mGoogleApiClient.connect();
             }
         } else {
-            Nearby.Messages.publish(mGoogleApiClient, mDeviceInfoMessage, PUB_SUB_STRATEGY)
+            PublishOptions options = new PublishOptions.Builder()
+                    .setStrategy(PUB_SUB_STRATEGY)
+                    .setCallback(new PublishCallback() {
+                        @Override
+                        public void onExpired() {
+                            super.onExpired();
+                            Log.i(TAG, "no longer publishing");
+                            updateSharedPreference(Constants.KEY_PUBLICATION_TASK,
+                                    Constants.TASK_NONE);
+                        }
+                    }).build();
+
+            Nearby.Messages.publish(mGoogleApiClient, mDeviceInfoMessage, options)
                     .setResultCallback(new ResultCallback<Status>() {
 
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
                                 Log.i(TAG, "published successfully");
-                                // Send a message to the handler to change state when done
-                                // publishing.
-                                sendMessageToHandler(Constants.NO_LONGER_PUBLISHING,
-                                        Constants.TTL_IN_MILLISECONDS);
                             } else {
                                 Log.i(TAG, "could not publish");
                                 handleUnsuccessfulNearbyResult(status);
@@ -589,35 +590,5 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                 .edit()
                 .putString(key, value)
                 .apply();
-    }
-
-    /**
-     * Handler for updating state when a device is no longer publishing or subscribing.
-     */
-    private static class ResetStateHandler extends Handler {
-        private final WeakReference<MainFragment> mWeakReference;
-
-        ResetStateHandler(MainFragment mainFragment) {
-            mWeakReference = new WeakReference<>(mainFragment);
-        }
-
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            MainFragment mainFragment = mWeakReference.get();
-            switch (msg.what) {
-                case Constants.NO_LONGER_SUBSCRIBING:
-                    if (mainFragment != null) {
-                        mainFragment.updateSharedPreference(Constants.KEY_SUBSCRIPTION_TASK,
-                                Constants.TASK_NONE);
-                    }
-                    break;
-                case Constants.NO_LONGER_PUBLISHING:
-                    if (mainFragment != null) {
-                        mainFragment.updateSharedPreference(Constants.KEY_PUBLICATION_TASK,
-                                Constants.TASK_NONE);
-                    }
-                    break;
-            }
-        }
     }
 }
