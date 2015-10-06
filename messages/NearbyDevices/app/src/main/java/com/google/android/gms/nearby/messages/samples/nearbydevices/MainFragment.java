@@ -91,8 +91,8 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     private static final String TAG = "MainFragment";
 
     /**
-     * Sets the time in seconds for a published message or a subscription to live. Set to three
-     * minutes.
+     * Sets the time in seconds for a published message or a subscription to live.
+     * Set to three minutes.
      */
     private static final Strategy PUB_SUB_STRATEGY = new Strategy.Builder()
             .setTtlSeconds(Constants.TTL_IN_SECONDS).build();
@@ -262,8 +262,8 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onStop() {
         if (mGoogleApiClient.isConnected() && !getActivity().isChangingConfigurations()) {
-            // Using Nearby is battery intensive. To preserve battery, stop subscribing or
-            // publishing when the fragment is inactive.
+            // Using Nearby is battery intensive. To conserve battery life,
+            // stop subscribing or publishing when the fragment is inactive.
             unsubscribe();
             unpublish();
             updateSharedPreference(Constants.KEY_SUBSCRIPTION_TASK, Constants.TASK_NONE);
@@ -280,8 +280,8 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "GoogleApiClient connected");
         // If the user has requested a subscription or publication task that requires
-        // GoogleApiClient to be connected, we keep track of that task and execute it here, since
-        // we now have a connected GoogleApiClient.
+        // GoogleApiClient to be connected, we keep track of that task and execute it here,
+        // since we now have a connected GoogleApiClient.
         executePendingTasks();
     }
 
@@ -304,15 +304,15 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // For simplicity, we don't handle connection failure thoroughly in this sample. Refer to
-        // the following Google Play services doc for more details:
+        // For simplicity, we don't handle connection failure thoroughly in this sample.
+        // Refer to the following Google Play services doc for more details:
         // http://developer.android.com/google/auth/api-client.html
         Log.i(TAG, "connection to GoogleApiClient failed");
     }
 
     /**
-     * Based on values stored in SharedPreferences, determines the subscription or publication task
-     * that should be performed.
+     * Based on values stored in SharedPreferences, determines the subscription
+     * or publication task that should be performed.
      */
     private String getPubSubTask(String taskKey) {
         return getActivity()
@@ -355,9 +355,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
      * updates state when the subscription expires.
      */
     private void subscribe() {
-        Log.i(TAG, "trying to subscribe");
-        // Cannot proceed without a connected GoogleApiClient. Reconnect and execute the pending
-        // task in onConnected().
+        Log.i(TAG, "Trying to subscribe.");
+        // Cannot proceed without a connected GoogleApiClient.
+        // Reconnect and execute the pending task in onConnected().
         if (!mGoogleApiClient.isConnected()) {
             if (!mGoogleApiClient.isConnecting()) {
                 mGoogleApiClient.connect();
@@ -370,7 +370,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onExpired() {
                             super.onExpired();
-                            Log.i(TAG, "no longer subscribing");
+                            Log.i(TAG, "No longer subscribing.");
                             updateSharedPreference(Constants.KEY_SUBSCRIPTION_TASK,
                                     Constants.TASK_NONE);
                         }
@@ -382,9 +382,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
-                                Log.i(TAG, "subscribed successfully");
+                                Log.i(TAG, "Subscribed successfully.");
                             } else {
-                                Log.i(TAG, "could not subscribe");
+                                Log.i(TAG, "Could not subscribe.");
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
@@ -398,9 +398,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
      * displaying an opt-in dialog.
      */
     private void unsubscribe() {
-        Log.i(TAG, "trying to unsubscribe");
-        // Cannot proceed without a connected GoogleApiClient. Reconnect and execute the pending
-        // task in onConnected().
+        Log.i(TAG, "Trying to unsubscribe.");
+        // Cannot proceed without a connected GoogleApiClient.
+        // Reconnect and execute the pending task in onConnected().
         if (!mGoogleApiClient.isConnected()) {
             if (!mGoogleApiClient.isConnecting()) {
                 mGoogleApiClient.connect();
@@ -412,11 +412,11 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
-                                Log.i(TAG, "unsubscribed successfully");
+                                Log.i(TAG, "Unsubscribed successfully.");
                                 updateSharedPreference(Constants.KEY_SUBSCRIPTION_TASK,
                                         Constants.TASK_NONE);
                             } else {
-                                Log.i(TAG, "could not unsubscribe");
+                                Log.i(TAG, "Could not unsubscribe.");
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
@@ -430,9 +430,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
      * that updates the UI when the publication expires.
      */
     private void publish() {
-        Log.i(TAG, "trying to publish");
-        // Cannot proceed without a connected GoogleApiClient. Reconnect and execute the pending
-        // task in onConnected().
+        Log.i(TAG, "Trying to publish.");
+        // Cannot proceed without a connected GoogleApiClient.
+        // Reconnect and execute the pending task in onConnected().
         if (!mGoogleApiClient.isConnected()) {
             if (!mGoogleApiClient.isConnecting()) {
                 mGoogleApiClient.connect();
@@ -444,7 +444,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onExpired() {
                             super.onExpired();
-                            Log.i(TAG, "no longer publishing");
+                            Log.i(TAG, "No longer publishing.");
                             updateSharedPreference(Constants.KEY_PUBLICATION_TASK,
                                     Constants.TASK_NONE);
                         }
@@ -456,9 +456,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
-                                Log.i(TAG, "published successfully");
+                                Log.i(TAG, "Published successfully.");
                             } else {
-                                Log.i(TAG, "could not publish");
+                                Log.i(TAG, "Could not publish.");
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
@@ -472,9 +472,9 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
      * opt-in dialog.
      */
     private void unpublish() {
-        Log.i(TAG, "trying to unpublish");
-        // Cannot proceed without a connected GoogleApiClient. Reconnect and execute the pending
-        // task in onConnected().
+        Log.i(TAG, "Trying to unpublish.");
+        // Cannot proceed without a connected GoogleApiClient.
+        // Reconnect and execute the pending task in onConnected().
         if (!mGoogleApiClient.isConnected()) {
             if (!mGoogleApiClient.isConnecting()) {
                 mGoogleApiClient.connect();
@@ -486,11 +486,11 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
-                                Log.i(TAG, "unpublished successfully");
+                                Log.i(TAG, "Unpublished successfully.");
                                 updateSharedPreference(Constants.KEY_PUBLICATION_TASK,
                                         Constants.TASK_NONE);
                             } else {
-                                Log.i(TAG, "could not unpublish");
+                                Log.i(TAG, "Could not unpublish.");
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
