@@ -34,7 +34,6 @@ fingerprint and package name for your app. Use
 `com.google.android.gms.nearby.messages.samples.nearbydevices`
 for the package name.
 
-1. Copy the API key generated, and paste it in `AndroidManifest.xml`.
 
 
 Support

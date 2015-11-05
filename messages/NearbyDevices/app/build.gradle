@@ -10,6 +10,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [ANDROID_NEARBY_API_KEY: System.getenv("ANDROID_NEARBY_API_KEY")]
     }
     buildTypes {
         release {
@@ -26,3 +27,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:8.1.0'
     compile 'com.google.android.gms:play-services-nearby:8.1.0'
 }
+
+task printKey << {
+    println System.getenv("ANDROID_NEARBY_API_KEY")
+}
+

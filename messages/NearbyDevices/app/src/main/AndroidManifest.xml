@@ -23,7 +23,7 @@
 
         <meta-data
             android:name="com.google.android.nearby.messages.API_KEY"
-            android:value="ADD KEY HERE" />
+            android:value="${ANDROID_NEARBY_API_KEY}" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
