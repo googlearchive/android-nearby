@@ -251,7 +251,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
 
         mDeviceInfoMessage = DeviceMessage.newNearbyMessage(
                 InstanceID.getInstance(getActivity().getApplicationContext()).getId());
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity().getApplicationContext())
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(Nearby.MESSAGES_API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
