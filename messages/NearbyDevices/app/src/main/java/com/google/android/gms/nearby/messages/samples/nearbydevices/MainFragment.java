@@ -199,7 +199,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                     @Override
                     public void run() {
                         mNearbyDevicesArrayAdapter.add(
-                                DeviceMessage.fromNearbyMessage(message).getMessageBody());
+                                DeviceMessage.fromNearbyMessage(message));
                     }
                 });
             }
@@ -211,7 +211,7 @@ public class MainFragment extends Fragment implements GoogleApiClient.Connection
                     @Override
                     public void run() {
                         mNearbyDevicesArrayAdapter.remove(
-                                DeviceMessage.fromNearbyMessage(message).getMessageBody());
+                                DeviceMessage.fromNearbyMessage(message));
                     }
                 });
             }

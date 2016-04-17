@@ -31,11 +31,9 @@ public class DeviceMessage {
      * Creates a {@code DeviceMessage} object from the string used to construct the payload to a
      * {@code Nearby} {@code Message}.
      */
-    public static DeviceMessage fromNearbyMessage(Message message) {
+    public static String fromNearbyMessage(Message message) {
         String nearbyMessageString = new String(message.getContent()).trim();
-        return gson.fromJson(
-                (new String(nearbyMessageString.getBytes(Charset.forName("UTF-8")))),
-                DeviceMessage.class);
+        return (new String(nearbyMessageString.getBytes(Charset.forName("UTF-8"))));
     }
 
     private DeviceMessage(String instanceId) {
