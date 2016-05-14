@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,9 @@ import java.util.List;
 
 
 /**
- * While subscribed in the background (see {@link MainActivityFragment#subscribe()}), this
- * service shows a persistent notification with the current set of messages from nearby beacons.
- * Nearby launches this service when a message is found or lost, and this service updates the
- * notification, then stops itself.
+ * While subscribed in the background, this service shows a persistent notification with the
+ * current set of messages from nearby beacons. Nearby launches this service when a message is
+ * found or lost, and this service updates the notification, then stops itself.
  */
 public class BackgroundSubscribeIntentService extends IntentService {
     private static final int MESSAGES_NOTIFICATION_ID = 1;
@@ -91,12 +90,6 @@ public class BackgroundSubscribeIntentService extends IntentService {
                 .setOngoing(true)
                 .setContentIntent(pi);
         notificationManager.notify(MESSAGES_NOTIFICATION_ID, notificationBuilder.build());
-    }
-
-    public static void cancelNotification(Context context) {
-        NotificationManager notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(MESSAGES_NOTIFICATION_ID);
     }
 
     private String getContentTitle(List<String> messages) {

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2015 Google, Inc.
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -18,4 +17,5 @@
     <dimen name="textsize_default">16sp</dimen>
     <dimen name="icon_dimension">48dp</dimen>
     <dimen name="card_padding">12dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

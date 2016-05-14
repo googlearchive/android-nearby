@@ -21,8 +21,8 @@ project.
 1. Click on `Credentials`, then click on `Create new key`, and pick `Android
    key`. Then register your Android app's SHA1 certificate fingerprint and
 package name for your app. Use
-`com.google.android.gms.nearby.messages.samples.nearbydevices` for the package
-name.
+`com.google.android.gms.nearby.messages.samples.nearbybackgroundbeacons` for the
+package name.
 
 1. Copy the API key generated, and paste it in `AndroidManifest.xml`.
 
