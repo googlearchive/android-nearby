@@ -1,5 +1,4 @@
 package com.google.android.gms.nearby.messages.samples.nearbydevices;
-
 import android.os.Build;
 
 import com.google.android.gms.nearby.messages.Message;
@@ -9,14 +8,14 @@ import java.nio.charset.Charset;
 
 /**
  * Used to prepare the payload for a
- * {@link com.google.android.gms.nearby.messages.Message Nearby Message}. Adds a unique id (an
- * InstanceID) to the Message payload, which helps Nearby distinguish between multiple devices with
+ * {@link com.google.android.gms.nearby.messages.Message Nearby Message}. Adds a unique id
+ * to the Message payload, which helps Nearby distinguish between multiple devices with
  * the same model name.
  */
 public class DeviceMessage {
     private static final Gson gson = new Gson();
 
-    private final String mInstanceId;
+    private final String mUUID;
     private final String mMessageBody;
 
     /**
@@ -24,7 +23,7 @@ public class DeviceMessage {
      */
     public static Message newNearbyMessage(String instanceId) {
         DeviceMessage deviceMessage = new DeviceMessage(instanceId);
-        return new Message(gson.toJson(deviceMessage).toString().getBytes(Charset.forName("UTF-8")));
+        return new Message(gson.toJson(deviceMessage).getBytes(Charset.forName("UTF-8")));
     }
 
     /**
@@ -38,9 +37,9 @@ public class DeviceMessage {
                 DeviceMessage.class);
     }
 
-    private DeviceMessage(String instanceId) {
-        this.mInstanceId = instanceId;
-        this.mMessageBody = Build.MODEL;
+    private DeviceMessage(String uuid) {
+        mUUID = uuid;
+        mMessageBody = Build.MODEL;
         // TODO(developer): add other fields that must be included in the Nearby Message payload.
     }
 
