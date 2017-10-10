@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
 import android.text.method.ScrollingMovementMethod;
@@ -25,15 +26,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.Payload;
+import com.google.android.gms.nearby.connection.Strategy;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Random;
 
 /**
  * Our WalkieTalkie Activity. This Activity has 3 {@link State}s.
  *
- * <p>{@link State#UNKNOWN}: We cannot do anything. We're waiting for the GoogleApiClient to
- * connect.
+ * <p>{@link State#UNKNOWN}: We cannot do anything while we're in this state. The app is likely in
+ * the background.
  *
  * <p>{@link State#SEARCHING}: Our default state (after we've connected). We constantly listen for a
  * device to advertise near us, while simultaneously advertising ourselves.
@@ -44,6 +45,12 @@ import java.util.Random;
 public class MainActivity extends ConnectionsActivity {
   /** If true, debug logs are shown on the device. */
   private static final boolean DEBUG = true;
+
+  /**
+   * The connection strategy we'll use for Nearby Connections. In this case, we've decided on
+   * P2P_STAR, which is a combination of Bluetooth Classic and WiFi Hotspots.
+   */
+  private static final Strategy STRATEGY = Strategy.P2P_STAR;
 
   /** Length of state change animations. */
   private static final long ANIMATION_DURATION = 600;
@@ -162,6 +169,8 @@ public class MainActivity extends ConnectionsActivity {
     mOriginalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
     audioManager.setStreamVolume(
         AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+
+    setState(State.SEARCHING);
   }
 
   @Override
@@ -198,26 +207,10 @@ public class MainActivity extends ConnectionsActivity {
     super.onBackPressed();
   }
 
-  /**
-   * We've connected to Nearby Connections. We can now start calling {@link #startDiscovering()} and
-   * {@link #startAdvertising()}.
-   */
-  @Override
-  public void onConnected(@Nullable Bundle bundle) {
-    super.onConnected(bundle);
-    setState(State.SEARCHING);
-  }
-
-  /** We were disconnected! Halt everything! */
-  @Override
-  public void onConnectionSuspended(int reason) {
-    super.onConnectionSuspended(reason);
-    setState(State.UNKNOWN);
-  }
-
   @Override
   protected void onEndpointDiscovered(Endpoint endpoint) {
     // We found an advertiser!
+    stopDiscovering();
     connectToEndpoint(endpoint);
   }
 
@@ -251,8 +244,8 @@ public class MainActivity extends ConnectionsActivity {
   @Override
   protected void onConnectionFailed(Endpoint endpoint) {
     // Let's try someone else.
-    if (getState() == State.SEARCHING && !getDiscoveredEndpoints().isEmpty()) {
-      connectToEndpoint(pickRandomElem(getDiscoveredEndpoints()));
+    if (getState() == State.SEARCHING) {
+      startDiscovering();
     }
   }
 
@@ -300,6 +293,9 @@ public class MainActivity extends ConnectionsActivity {
         stopDiscovering();
         stopAdvertising();
         break;
+      case UNKNOWN:
+        stopAllEndpoints();
+        break;
       default:
         // no-op
         break;
@@ -342,15 +338,17 @@ public class MainActivity extends ConnectionsActivity {
     updateTextView(mPreviousStateView, oldState);
     updateTextView(mCurrentStateView, newState);
 
-    mCurrentAnimator = createAnimator(false /* reverse */);
-    mCurrentAnimator.addListener(
-        new AnimatorListener() {
-          @Override
-          public void onAnimationEnd(Animator animator) {
-            updateTextView(mCurrentStateView, newState);
-          }
-        });
-    mCurrentAnimator.start();
+    if (ViewCompat.isLaidOut(mCurrentStateView)) {
+      mCurrentAnimator = createAnimator(false /* reverse */);
+      mCurrentAnimator.addListener(
+          new AnimatorListener() {
+            @Override
+            public void onAnimationEnd(Animator animator) {
+              updateTextView(mCurrentStateView, newState);
+            }
+          });
+      mCurrentAnimator.start();
+    }
   }
 
   /** Transitions from the old state to the new state with an animation implying moving backward. */
@@ -362,15 +360,17 @@ public class MainActivity extends ConnectionsActivity {
     updateTextView(mCurrentStateView, oldState);
     updateTextView(mPreviousStateView, newState);
 
-    mCurrentAnimator = createAnimator(true /* reverse */);
-    mCurrentAnimator.addListener(
-        new AnimatorListener() {
-          @Override
-          public void onAnimationEnd(Animator animator) {
-            updateTextView(mCurrentStateView, newState);
-          }
-        });
-    mCurrentAnimator.start();
+    if (ViewCompat.isLaidOut(mCurrentStateView)) {
+      mCurrentAnimator = createAnimator(true /* reverse */);
+      mCurrentAnimator.addListener(
+          new AnimatorListener() {
+            @Override
+            public void onAnimationEnd(Animator animator) {
+              updateTextView(mCurrentStateView, newState);
+            }
+          });
+      mCurrentAnimator.start();
+    }
   }
 
   @NonNull
@@ -542,6 +542,12 @@ public class MainActivity extends ConnectionsActivity {
     return SERVICE_ID;
   }
 
+  /** {@see ConnectionsActivity#getStrategy()} */
+  @Override
+  public Strategy getStrategy() {
+    return STRATEGY;
+  }
+
   @Override
   protected void logV(String msg) {
     super.logV(msg);
@@ -557,6 +563,12 @@ public class MainActivity extends ConnectionsActivity {
   @Override
   protected void logW(String msg) {
     super.logW(msg);
+    appendToLogs(toColor(msg, getResources().getColor(R.color.log_warning)));
+  }
+
+  @Override
+  protected void logW(String msg, Throwable e) {
+    super.logW(msg, e);
     appendToLogs(toColor(msg, getResources().getColor(R.color.log_warning)));
   }
 
@@ -585,11 +597,6 @@ public class MainActivity extends ConnectionsActivity {
       name += random.nextInt(10);
     }
     return name;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> T pickRandomElem(Collection<T> collection) {
-    return (T) collection.toArray()[new Random().nextInt(collection.size())];
   }
 
   /**
