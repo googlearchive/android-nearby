@@ -9,7 +9,7 @@ Where to Download
 ---------------
 ```groovy
 dependencies {
-  compile 'com.google.android.gms:play-services-nearby:14.0.0'
+  compile 'com.google.android.gms:play-services-nearby:11.8.0'
 }
 ```
 
