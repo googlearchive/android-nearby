@@ -1,7 +1,5 @@
 package com.google.location.nearby.apps.walkietalkie;
 
-import static com.google.location.nearby.apps.walkietalkie.Constants.TAG;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -13,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -30,12 +29,15 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import static com.google.location.nearby.apps.walkietalkie.Constants.TAG;
 
 /** A class that connects to Nearby Connections and provides convenience methods and callbacks. */
 public abstract class ConnectionsActivity extends AppCompatActivity {
@@ -187,12 +189,13 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
   protected void startAdvertising() {
     mIsAdvertising = true;
     final String localEndpointName = getName();
+
     mConnectionsClient
         .startAdvertising(
             localEndpointName,
             getServiceId(),
             mConnectionLifecycleCallback,
-            new AdvertisingOptions.Builder().setStrategy(getStrategy()).build())
+            new AdvertisingOptions(getStrategy()))
         .addOnSuccessListener(
             new OnSuccessListener<Void>() {
               @Override
@@ -294,7 +297,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
                 logD(String.format("onEndpointLost(endpointId=%s)", endpointId));
               }
             },
-            new DiscoveryOptions.Builder().setStrategy(getStrategy()).build())
+            new DiscoveryOptions(getStrategy()))
         .addOnSuccessListener(
             new OnSuccessListener<Void>() {
               @Override
