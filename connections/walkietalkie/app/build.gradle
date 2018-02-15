@@ -11,6 +11,8 @@ android {
         multiDexEnabled true
     }
 
+    flavorDimensions "default"
+
     productFlavors {
         manual {
             applicationId "com.google.location.nearby.apps.walkietalkie.manual"
