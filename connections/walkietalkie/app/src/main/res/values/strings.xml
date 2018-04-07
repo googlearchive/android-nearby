@@ -6,5 +6,5 @@
     <string name="toast_disconnected">Disconnected from %s</string>
 
     <string name="status_unknown">Please wait</string>
-    <string name="status_connected">Connected\nHold the volume keys to talk</string>
+    <string name="status_connected">Connected\nHold any of the volume keys to talk</string>
 </resources>
