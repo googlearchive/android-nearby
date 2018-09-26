@@ -37,6 +37,8 @@ public final class CodenameGenerator {
         "Lollipop",
         "Marshmallow",
         "Nougat",
+        "Oreo",
+        "Pie"
       };
 
   private static final Random generator = new Random();

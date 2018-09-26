@@ -6,11 +6,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -249,14 +249,16 @@ public class MainActivity extends AppCompatActivity {
   private void startDiscovery() {
     // Note: Discovery may fail. To keep this demo simple, we don't handle failures.
     connectionsClient.startDiscovery(
-        getPackageName(), endpointDiscoveryCallback, new DiscoveryOptions(STRATEGY));
+            getPackageName(), endpointDiscoveryCallback,
+            new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
   }
 
   /** Broadcasts our presence using Nearby Connections so other players can find us. */
   private void startAdvertising() {
     // Note: Advertising may fail. To keep this demo simple, we don't handle failures.
     connectionsClient.startAdvertising(
-        codeName, getPackageName(), connectionLifecycleCallback, new AdvertisingOptions(STRATEGY));
+            codeName, getPackageName(), connectionLifecycleCallback,
+            new AdvertisingOptions.Builder().setStrategy(STRATEGY).build());
   }
 
   /** Wipes all game state and updates the UI accordingly. */
