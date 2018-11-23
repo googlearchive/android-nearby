@@ -11,13 +11,15 @@ android {
         multiDexEnabled true
     }
 
-    flavorDimensions "default"
+    flavorDimensions "mode"
 
     productFlavors {
         manual {
+            dimension "mode"
             applicationId "com.google.location.nearby.apps.walkietalkie.manual"
         }
         automatic {
+            dimension "mode"
             applicationId "com.google.location.nearby.apps.walkietalkie.automatic"
         }
     }
