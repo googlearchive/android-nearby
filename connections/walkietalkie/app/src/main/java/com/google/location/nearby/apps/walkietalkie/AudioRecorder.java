@@ -130,8 +130,8 @@ public class AudioRecorder {
 
     @Override
     protected int getMinBufferSize(int sampleRate) {
-      return AudioRecord.getMinBufferSize(sampleRate,
-              AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+      return AudioRecord.getMinBufferSize(
+          sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
     }
   }
 }

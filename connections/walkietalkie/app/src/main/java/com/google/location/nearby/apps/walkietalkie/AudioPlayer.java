@@ -111,8 +111,8 @@ public class AudioPlayer {
 
     @Override
     protected int getMinBufferSize(int sampleRate) {
-      return AudioTrack.getMinBufferSize(sampleRate,
-              AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+      return AudioTrack.getMinBufferSize(
+          sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
     }
   }
 }
