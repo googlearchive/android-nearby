@@ -95,7 +95,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
       new ConnectionLifecycleCallback() {
         @Override
         public void onConnectionInitiated(
-            @NonNull String endpointId, ConnectionInfo connectionInfo) {
+            String endpointId, ConnectionInfo connectionInfo) {
           logD(
               String.format(
                   "onConnectionInitiated(endpointId=%s, endpointName=%s)",
@@ -107,7 +107,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
 
         @Override
         public void onConnectionResult(
-            @NonNull String endpointId, @NonNull ConnectionResolution result) {
+            String endpointId, ConnectionResolution result) {
           logD(String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
 
           // We're no longer connecting
@@ -125,7 +125,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onDisconnected(@NonNull String endpointId) {
+        public void onDisconnected(String endpointId) {
           if (!mEstablishedConnections.containsKey(endpointId)) {
             logW("Unexpected disconnection from endpoint " + endpointId);
             return;
@@ -138,14 +138,14 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
   private final PayloadCallback mPayloadCallback =
       new PayloadCallback() {
         @Override
-        public void onPayloadReceived(@NonNull String endpointId, @NonNull Payload payload) {
+        public void onPayloadReceived(String endpointId, Payload payload) {
           logD(String.format("onPayloadReceived(endpointId=%s, payload=%s)", endpointId, payload));
           onReceive(mEstablishedConnections.get(endpointId), payload);
         }
 
         @Override
         public void onPayloadTransferUpdate(
-            @NonNull String endpointId, @NonNull PayloadTransferUpdate update) {
+            String endpointId, PayloadTransferUpdate update) {
           logD(
               String.format(
                   "onPayloadTransferUpdate(endpointId=%s, update=%s)", endpointId, update));
@@ -297,7 +297,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
             new EndpointDiscoveryCallback() {
               @Override
               public void onEndpointFound(
-                  @NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
+                  String endpointId, DiscoveredEndpointInfo info) {
                 logD(
                     String.format(
                         "onEndpointFound(endpointId=%s, serviceId=%s, endpointName=%s)",
@@ -311,7 +311,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
               }
 
               @Override
-              public void onEndpointLost(@NonNull String endpointId) {
+              public void onEndpointLost(String endpointId) {
                 logD(String.format("onEndpointLost(endpointId=%s)", endpointId));
               }
             },
@@ -589,7 +589,6 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
       return id.hashCode();
     }
 
-    @NonNull
     @Override
     public String toString() {
       return String.format("Endpoint{id=%s, name=%s}", id, name);
