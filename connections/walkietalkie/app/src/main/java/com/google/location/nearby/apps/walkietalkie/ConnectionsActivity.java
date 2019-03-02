@@ -3,10 +3,12 @@ package com.google.location.nearby.apps.walkietalkie;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -159,7 +161,14 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
   protected void onStart() {
     super.onStart();
     if (!hasPermissions(this, getRequiredPermissions())) {
-      requestPermissions(getRequiredPermissions(), REQUEST_CODE_REQUIRED_PERMISSIONS);
+      if (!hasPermissions(this, getRequiredPermissions())) {
+        if (Build.VERSION.SDK_INT < 23) {
+          ActivityCompat.requestPermissions(
+              this, getRequiredPermissions(), REQUEST_CODE_REQUIRED_PERMISSIONS);
+        } else {
+          requestPermissions(getRequiredPermissions(), REQUEST_CODE_REQUIRED_PERMISSIONS);
+        }
+      }
     }
   }
 
@@ -190,12 +199,15 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
     mIsAdvertising = true;
     final String localEndpointName = getName();
 
+    AdvertisingOptions.Builder advertisingOptions = new AdvertisingOptions.Builder();
+    advertisingOptions.setStrategy(getStrategy());
+
     mConnectionsClient
         .startAdvertising(
             localEndpointName,
             getServiceId(),
             mConnectionLifecycleCallback,
-            new AdvertisingOptions(getStrategy()))
+            advertisingOptions.build())
         .addOnSuccessListener(
             new OnSuccessListener<Void>() {
               @Override
@@ -274,6 +286,8 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
   protected void startDiscovering() {
     mIsDiscovering = true;
     mDiscoveredEndpoints.clear();
+    DiscoveryOptions.Builder discoveryOptions = new DiscoveryOptions.Builder();
+    discoveryOptions.setStrategy(getStrategy());
     mConnectionsClient
         .startDiscovery(
             getServiceId(),
@@ -297,7 +311,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
                 logD(String.format("onEndpointLost(endpointId=%s)", endpointId));
               }
             },
-            new DiscoveryOptions(getStrategy()))
+            discoveryOptions.build())
         .addOnSuccessListener(
             new OnSuccessListener<Void>() {
               @Override
@@ -419,16 +433,12 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
 
   /** Returns a list of currently connected endpoints. */
   protected Set<Endpoint> getDiscoveredEndpoints() {
-    Set<Endpoint> endpoints = new HashSet<>();
-    endpoints.addAll(mDiscoveredEndpoints.values());
-    return endpoints;
+    return new HashSet<>(mDiscoveredEndpoints.values());
   }
 
   /** Returns a list of currently connected endpoints. */
   protected Set<Endpoint> getConnectedEndpoints() {
-    Set<Endpoint> endpoints = new HashSet<>();
-    endpoints.addAll(mEstablishedConnections.values());
-    return endpoints;
+    return new HashSet<>(mEstablishedConnections.values());
   }
 
   /**
@@ -563,7 +573,7 @@ public abstract class ConnectionsActivity extends AppCompatActivity {
 
     @Override
     public boolean equals(Object obj) {
-      if (obj != null && obj instanceof Endpoint) {
+      if (obj instanceof Endpoint) {
         Endpoint other = (Endpoint) obj;
         return id.equals(other.id);
       }
